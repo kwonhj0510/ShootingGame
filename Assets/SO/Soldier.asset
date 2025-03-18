@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Soldier
   m_EditorClassIdentifier: 
   characterName: Soldier
-  speed: 800
+  speed: 80
   maxHP: 100

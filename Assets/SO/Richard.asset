@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Richard
   m_EditorClassIdentifier: 
   characterName: Richard
-  speed: 100
+  speed: 10
   maxHP: 80

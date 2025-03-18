@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Commando
   m_EditorClassIdentifier: 
   characterName: Commando
-  speed: 780
+  speed: 78
   maxHP: 150
