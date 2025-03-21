@@ -3,12 +3,18 @@ using UnityEngine;
 public class Gun : MonoBehaviour
 {
     private KeyCode keyCodeFire = KeyCode.J;
+    public Transform firePoint;
 
     private void Update()
     {
-        if (Input.GetKey(keyCodeFire))
+        if (Input.GetKeyDown(keyCodeFire))
         {
-            ObjectPool.SpawnFromPool("Bullet", transform.position);
+            GameObject bullet = ObjectPool.SpawnFromPool("Bullet", firePoint.position, transform.rotation);
+            if(bullet != null)
+            {
+                Bullet bulletScript = bullet.GetComponent<Bullet>();
+                bulletScript.SetDirection(firePoint.right);
+            }
         }
     }
 }

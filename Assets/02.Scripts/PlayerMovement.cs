@@ -5,17 +5,17 @@ public class PlayerMovement : MonoBehaviour
     public CharacterData characterData;
 
     private Rigidbody2D rb;
+    private CapsuleCollider2D capsuleCollider;
+
     private float jumpForce = 10f;
+    private int maxJumpCount = 2;
+    private int currentJumpCount = 0;
     private float speed;
     private int hp;
 
     [SerializeField] private LayerMask groundLayerMask;
-    private CapsuleCollider2D capsuleCollider;
     private bool isGrounded;
     private Vector3 footPosition;
-
-    private int maxJumpCount = 2;
-    private int currentJumpCount = 0;
 
     private KeyCode keyCodeJump = KeyCode.Space;
 
@@ -55,6 +55,15 @@ public class PlayerMovement : MonoBehaviour
     private void Move()
     {
         float x = Input.GetAxisRaw("Horizontal"); 
+
+        if(x > 0)
+        {
+            transform.rotation = Quaternion.Euler(0, 0, 0);
+        }
+        else if(x < 0)
+        {
+            transform.rotation = Quaternion.Euler(0, -180, 0);
+        }
 
         rb.linearVelocity = new Vector2(x * speed / 10, rb.linearVelocityY);
     }
