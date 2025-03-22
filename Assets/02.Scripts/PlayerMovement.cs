@@ -10,7 +10,7 @@ public class PlayerMovement : MonoBehaviour
     private float jumpForce = 10f;
     private int maxJumpCount = 2;
     private int currentJumpCount = 0;
-    private float speed;
+    public float speed;
     private int hp;
 
     [SerializeField] private LayerMask groundLayerMask;
