@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Gun : MonoBehaviour
+public class PlayerAttack : MonoBehaviour
 {
     public Transform firePoint;
     public WeaponData weaponData;
@@ -10,22 +10,27 @@ public class Gun : MonoBehaviour
     private float reloadTime;
     private float bulletSpeed = 15;
     private int maxAmmoPerMag;
-    private int curAmmoPerMag = 0;
+    private int curAmmoPerMag;
+    private int curGrenade;
 
-    private KeyCode keyCodeFire = KeyCode.J;
+    private KeyCode fire = KeyCode.J;
+    private KeyCode throwGrenade = KeyCode.U;
 
     private void Start()
     {
         maxShotDelay = weaponData.perShot;
         maxAmmoPerMag = weaponData.magazine;
         reloadTime = weaponData.reloadTime;
+        curAmmoPerMag = maxAmmoPerMag;
+        curGrenade = 10;
     }
 
     private void Update()
     {
         curShotDelay += Time.deltaTime;
         Fire();
-        if(curAmmoPerMag == maxAmmoPerMag)
+        ThrowGrenade();
+        if (curAmmoPerMag <= 0)
         {
             Invoke("Reroad", reloadTime);
         }
@@ -33,21 +38,35 @@ public class Gun : MonoBehaviour
 
     private void Fire()
     {
-        if (!Input.GetKey(keyCodeFire)) return;
+        if (!Input.GetKey(fire)) return;
         if (curShotDelay < maxShotDelay) return;
-        if (curAmmoPerMag == maxAmmoPerMag) return;
+        if (curAmmoPerMag <= 0) return;
         GameObject bullet = ObjectPool.SpawnFromPool("Bullet", firePoint.position, transform.rotation);
         if (bullet != null)
         {
             Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
             rb.AddForce(firePoint.right * bulletSpeed, ForceMode2D.Impulse);
             curShotDelay = 0;
-            curAmmoPerMag += 1;
+            curAmmoPerMag--;
         }
     }
 
     private void Reroad()
     {
-        curAmmoPerMag = 0;
+        curAmmoPerMag = maxAmmoPerMag;
+    }
+
+    private void ThrowGrenade()
+    {
+        if (!Input.GetKeyDown(throwGrenade)) return;
+        if (curGrenade <= 0) return;
+        GameObject grenade = ObjectPool.SpawnFromPool("Grenade", transform.position);
+        Debug.Log(grenade);
+        if (grenade != null)
+        {
+            Rigidbody2D rb = grenade.GetComponent<Rigidbody2D>();
+            //rb.AddForce(new Vector2(firePoint.position.x * 4, 6), ForceMode2D.Impulse); 수류탄 포물선
+            curGrenade--;
+        }
     }
 }
