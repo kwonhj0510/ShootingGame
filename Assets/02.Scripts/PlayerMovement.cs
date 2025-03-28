@@ -3,18 +3,18 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     public CharacterData characterData;
-
     private Rigidbody2D rb;
     private CapsuleCollider2D capsuleCollider;
 
+    [SerializeField] private LayerMask groundLayerMask;
+
+    public float speed;
     private float jumpForce = 10f;
     private int maxJumpCount = 2;
     private int currentJumpCount = 0;
-    public float speed;
     private int hp;
-
-    [SerializeField] private LayerMask groundLayerMask;
     private bool isGrounded;
+
     private Vector3 footPosition;
 
     private KeyCode keyCodeJump = KeyCode.Space;
@@ -27,14 +27,16 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start()
     {
+        //선택한 캐릭터 스탯 적용
         speed = characterData.speed;
         hp = characterData.maxHP;
     }
 
     private void FixedUpdate()
     {
+        //바닥 확인
         Bounds bounds = capsuleCollider.bounds;
-        footPosition = new Vector2(bounds.center.x, bounds.min.y);
+        footPosition = new Vector3(bounds.center.x, bounds.min.y);
         isGrounded = Physics2D.OverlapCircle(footPosition, 0.1f, groundLayerMask);
 
         if (isGrounded && rb.linearVelocityY < 0) 
@@ -56,6 +58,7 @@ public class PlayerMovement : MonoBehaviour
     {
         float x = Input.GetAxisRaw("Horizontal"); 
 
+        //Flip
         if(x > 0)
         {
             transform.rotation = Quaternion.Euler(0, 0, 0);
