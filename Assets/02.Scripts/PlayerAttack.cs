@@ -3,31 +3,38 @@ using UnityEngine;
 public class PlayerAttack : MonoBehaviour
 {
     public Transform firePoint;
+    public Transform meleeBoxPoint;
     public WeaponData weaponData;
 
-    private float maxShotDelay;
-    private float curShotDelay;
+    private float maxAttackDelay;
+    private float curAttackDelay;
     private float reloadTime;
     private float bulletSpeed = 15;
+    private float damage;
     private int maxAmmoPerMag;
     private int curAmmoPerMag;
     private int curGrenade;
 
+    private Vector2 meleeBoxPosition;
+    private Vector2 meleeBoxSize;
+
     private KeyCode fire = KeyCode.J;
+    private KeyCode meleeAttack = KeyCode.I;
     private KeyCode throwGrenade = KeyCode.U;
 
     private void Start()
     {
-        maxShotDelay = weaponData.perShot;
+        maxAttackDelay = weaponData.perShot;
         maxAmmoPerMag = weaponData.magazine;
         reloadTime = weaponData.reloadTime;
         curAmmoPerMag = maxAmmoPerMag;
+        damage = weaponData.damage;
         curGrenade = 10;
     }
 
     private void Update()
     {
-        curShotDelay += Time.deltaTime;
+        curAttackDelay += Time.deltaTime;
         Fire();
         ThrowGrenade();
         if (curAmmoPerMag <= 0)
@@ -39,14 +46,14 @@ public class PlayerAttack : MonoBehaviour
     private void Fire()
     {
         if (!Input.GetKey(fire)) return;
-        if (curShotDelay < maxShotDelay) return;
+        if (curAttackDelay < maxAttackDelay) return;
         if (curAmmoPerMag <= 0) return;
         GameObject bullet = ObjectPool.SpawnFromPool("Bullet", firePoint.position, transform.rotation);
         if (bullet != null)
         {
             Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
             rb.AddForce(firePoint.right * bulletSpeed, ForceMode2D.Impulse);
-            curShotDelay = 0;
+            curAttackDelay = 0;
             curAmmoPerMag--;
         }
     }
@@ -65,8 +72,19 @@ public class PlayerAttack : MonoBehaviour
         if (grenade != null)
         {
             Rigidbody2D rb = grenade.GetComponent<Rigidbody2D>();
-            //rb.AddForce(new Vector2(firePoint.position.x * 4, 6), ForceMode2D.Impulse); 수류탄 포물선
+            rb.AddForce(new Vector2(firePoint.right.x * 4, 7), ForceMode2D.Impulse);
+
             curGrenade--;
         }
+    }
+
+    private void MeleeAttack()
+    {        
+        meleeBoxSize = new Vector2(2f, 1f);
+        if(!Input.GetKeyDown(meleeAttack)) return;
+        if(curAttackDelay < maxAttackDelay) return;
+
+        Collider2D[] colliders =  Physics2D.OverlapBoxAll(meleeBoxPosition, meleeBoxSize, 0f);
+        
     }
 }
