@@ -16,5 +16,5 @@ MonoBehaviour:
   damage: 15
   magazine: 0
   effectiveRange: 1
-  reloadTime: 0.4
+  reloadTime: 0
   perShot: 0.4
