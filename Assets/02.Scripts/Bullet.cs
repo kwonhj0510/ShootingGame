@@ -7,7 +7,7 @@ public class Bullet : MonoBehaviour
         if (collision.gameObject.CompareTag("Enemy"))
         {
             Enemy enemy = collision.gameObject.GetComponent<Enemy>();
-            enemy.TakeDamage(1);
+            enemy.TakeDamage(1); //죽었을 땐 데미지가 들어가면 안됨
             ObjectPool.ReturnToPool("Bullet", this.gameObject);
         }
     }

@@ -15,9 +15,6 @@ public class PlayerAttack : MonoBehaviour
     private int curAmmoPerMag;
     private int curGrenade;
 
-    private Vector2 meleeBoxPosition;
-    private Vector2 meleeBoxSize;
-
     private KeyCode fire = KeyCode.J;
     private KeyCode meleeAttack = KeyCode.I;
     private KeyCode throwGrenade = KeyCode.U;
@@ -37,6 +34,7 @@ public class PlayerAttack : MonoBehaviour
         curAttackDelay += Time.deltaTime;
         Fire();
         ThrowGrenade();
+        MeleeAttack();
         if (curAmmoPerMag <= 0)
         {
             Invoke("Reroad", reloadTime);
@@ -80,11 +78,20 @@ public class PlayerAttack : MonoBehaviour
 
     private void MeleeAttack()
     {        
-        meleeBoxSize = new Vector2(2f, 1f);
         if(!Input.GetKeyDown(meleeAttack)) return;
         if(curAttackDelay < maxAttackDelay) return;
 
+        Vector2 meleeBoxPosition = new Vector2(transform.position.x + 1f, transform.position.y);
+        Vector2 meleeBoxSize = new Vector2(2f, 1f);
+
         Collider2D[] colliders =  Physics2D.OverlapBoxAll(meleeBoxPosition, meleeBoxSize, 0f);
-        
+        foreach(Collider2D collider in colliders)
+        {
+            if (collider.CompareTag("Enemy"))
+            {
+                Enemy enemy = collider.gameObject.GetComponent<Enemy>();
+                enemy.TakeDamage(damage);
+            }
+        }
     }
 }
