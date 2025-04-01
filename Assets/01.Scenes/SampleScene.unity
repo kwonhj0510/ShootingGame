@@ -1647,7 +1647,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firePoint: {fileID: 1642055189}
-  meleeBoxPoint: {fileID: 0}
   weaponData: {fileID: 11400000, guid: 4e3c1ae989e659943a3b6816f64b60ad, type: 2}
 --- !u!1 &1260760634
 GameObject:

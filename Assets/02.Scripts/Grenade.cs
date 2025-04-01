@@ -23,7 +23,7 @@ public class Grenade : MonoBehaviour
     {
         yield return new WaitForSeconds(1);
 
-        ObjectPool.ReturnToPool("Bullet", this.gameObject);
         //수류탄 터지는 코드
+        ObjectPool.ReturnToPool("Grenade", this.gameObject);
     }
 }

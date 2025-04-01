@@ -1,9 +1,9 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "WeaponData", menuName = "Game/WeaponData")]
-public class WeaponData : ScriptableObject
+public class GunData : ScriptableObject
 {
-    public string weaponName;       //이름
+    public string name;       //이름
     public float damage;              //데미지
     public int magazine;            //탄창 수
     public float effectiveRange;    //사정거리
