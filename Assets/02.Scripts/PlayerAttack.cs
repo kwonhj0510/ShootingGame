@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
@@ -6,6 +7,7 @@ public class PlayerAttack : MonoBehaviour
     public GunData weaponData;
 
     //ÃÑ Á¤º¸
+    [SerializeField] private GameObject gun;
     private float gunDamage;
     private float maxShotDelay;
     private float curShotDelay;
@@ -60,7 +62,7 @@ public class PlayerAttack : MonoBehaviour
         if (curShotDelay < maxShotDelay) return;
         if (curAmmoPerMag <= 0) return;
 
-        GameObject bullet = ObjectPool.SpawnFromPool("Bullet", firePoint.position, transform.rotation);
+        GameObject bullet = ObjectPool.SpawnFromPool("Bullet", firePoint.position);
         Bullet bulletScript = bullet.GetComponent<Bullet>();
         bulletScript.range = effectiveRange;
 
@@ -88,13 +90,15 @@ public class PlayerAttack : MonoBehaviour
 
     private void MeleeAttack()
     {        
-        if(!Input.GetKeyDown(meleeAttack) || isAttack) return;
+        if(!Input.GetKeyDown(meleeAttack)) return;
         if (curAttackDelay < maxAttackDelay) return;
+
+        isAttack = true;
 
         meleeBoxPosition = new Vector2(transform.position.x + 0.5f, transform.position.y);
         meleeBoxSize = new Vector2(2f, 1f);
 
-        isAttack = true;
+        gun.transform.rotation = Quaternion.Euler(0f, 0f, -15f);
 
         Collider2D[] colliders =  Physics2D.OverlapBoxAll(meleeBoxPosition, meleeBoxSize, 0f);
         foreach(Collider2D collider in colliders)
@@ -106,16 +110,25 @@ public class PlayerAttack : MonoBehaviour
             }
         }
         curAttackDelay = 0;
+
+        StartCoroutine(ResetGunRotation());
     }
 
-    //private void OnDrawGizmosSelected()
-    //{
-    //    Gizmos.color = Color.green;
+    private IEnumerator ResetGunRotation()
+    {
+        yield return new WaitForSeconds(0.3f); // 0.2ÃÊ µô·¹ÀÌ ÈÄ º¹±Í
+        isAttack = false;
+        gun.transform.rotation = Quaternion.Euler(Vector3.zero);
+    }
 
-    //    if (isAttack)
-    //    {
-    //        Gizmos.color = Color.yellow;
-    //        Gizmos.DrawCube(meleeBoxPosition, meleeBoxSize);
-    //    }
-    //}
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.green;
+
+        if (isAttack)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawCube(meleeBoxPosition, meleeBoxSize);
+        }
+    }
 }
