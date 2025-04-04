@@ -6,7 +6,7 @@ public class PlayerAttack : MonoBehaviour
     public Transform firePoint;
     public GunData weaponData;
 
-    //ÃÑ Á¤º¸
+    [Header("Gun")]
     [SerializeField] private GameObject gun;
     private float gunDamage;
     private float maxShotDelay;
@@ -15,17 +15,18 @@ public class PlayerAttack : MonoBehaviour
     private float effectiveRange;
     private int maxAmmoPerMag;
     private int curAmmoPerMag;
+    private WaitForSeconds reloadWaitForSeconds;
 
-    //Ä® ¹× ¼ö·ùÅº
+    [Header("Knife and Grenade")]
     private int curGrenade;
     private float meleeDamage = 15f;
     private float maxAttackDelay = 0.4f;
     private float curAttackDelay;
 
+    [Header("MeleeAttack")]
+    [SerializeField] private Transform meleeBoxTransform;
+    [SerializeField] private Vector2 meleeBoxSize;
     private bool isAttack = false;
-
-    private Vector2 meleeBoxPosition;
-    private Vector2 meleeBoxSize;
 
     private KeyCode fire = KeyCode.J;
     private KeyCode meleeAttack = KeyCode.I;
@@ -36,6 +37,7 @@ public class PlayerAttack : MonoBehaviour
         maxShotDelay = weaponData.perShot;
         maxAmmoPerMag = weaponData.magazine;
         reloadTime = weaponData.reloadTime;
+        reloadWaitForSeconds = new WaitForSeconds(reloadTime);
         curAmmoPerMag = maxAmmoPerMag;
         gunDamage = weaponData.damage;
         effectiveRange = weaponData.effectiveRange;
@@ -52,28 +54,31 @@ public class PlayerAttack : MonoBehaviour
         MeleeAttack();
         if (curAmmoPerMag <= 0)
         {
-            Invoke("Reroad", reloadTime);
+            StartCoroutine(Reroad());
         }
     }
 
+    #region Gun_Fire
     private void Fire()
     {
         if (!Input.GetKey(fire)) return;
         if (curShotDelay < maxShotDelay) return;
         if (curAmmoPerMag <= 0) return;
 
-        GameObject bullet = ObjectPool.SpawnFromPool("Bullet", firePoint.position);
+        GameObject bullet = ObjectPool.SpawnFromPool("Bullet", firePoint.position, transform.rotation);
         Bullet bulletScript = bullet.GetComponent<Bullet>();
-        bulletScript.range = effectiveRange;
+        bulletScript.InitBullet(firePoint, gunDamage, effectiveRange);
 
         curShotDelay = 0;
         curAmmoPerMag--;
     }
 
-    private void Reroad()
+    private IEnumerator Reroad()
     {
+        yield return reloadWaitForSeconds;
         curAmmoPerMag = maxAmmoPerMag;
     }
+    #endregion
 
     private void ThrowGrenade()
     {
@@ -89,19 +94,16 @@ public class PlayerAttack : MonoBehaviour
     }
 
     private void MeleeAttack()
-    {        
-        if(!Input.GetKeyDown(meleeAttack)) return;
+    {
+        if (!Input.GetKeyDown(meleeAttack)) return;
         if (curAttackDelay < maxAttackDelay) return;
 
         isAttack = true;
 
-        meleeBoxPosition = new Vector2(transform.position.x + 0.5f, transform.position.y);
-        meleeBoxSize = new Vector2(2f, 1f);
+        gun.transform.rotation = Quaternion.Euler(gun.transform.rotation.x, gun.transform.rotation.y, -15f);
 
-        gun.transform.rotation = Quaternion.Euler(0f, 0f, -15f);
-
-        Collider2D[] colliders =  Physics2D.OverlapBoxAll(meleeBoxPosition, meleeBoxSize, 0f);
-        foreach(Collider2D collider in colliders)
+        Collider2D[] colliders = Physics2D.OverlapBoxAll(meleeBoxTransform.transform.position, meleeBoxSize, 0f);
+        foreach (Collider2D collider in colliders)
         {
             if (collider.CompareTag("Enemy"))
             {
@@ -123,12 +125,7 @@ public class PlayerAttack : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.green;
-
-        if (isAttack)
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawCube(meleeBoxPosition, meleeBoxSize);
-        }
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(meleeBoxTransform.transform.position, meleeBoxSize);
     }
 }
