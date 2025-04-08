@@ -25,6 +25,10 @@ public class Bullet : MonoBehaviour
             enemy.TakeDamage(damage);
             ObjectPool.ReturnToPool("Bullet", this.gameObject);
         }
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            ObjectPool.ReturnToPool("Bullet", this.gameObject);
+        }
     }
 
     /// <summary>
