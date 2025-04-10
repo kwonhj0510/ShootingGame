@@ -2,9 +2,11 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    
     public CharacterData characterData;
     private Rigidbody2D rb;
     private CapsuleCollider2D capsuleCollider;
+    private Animator animator;
 
     [SerializeField] private LayerMask groundLayerMask;
 
@@ -23,6 +25,7 @@ public class PlayerMovement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         capsuleCollider = GetComponent<CapsuleCollider2D>();
+        animator = GetComponent<Animator>();
     }
 
     private void Start()
@@ -42,6 +45,7 @@ public class PlayerMovement : MonoBehaviour
         if (isGrounded && rb.linearVelocityY < 0) 
         {
             currentJumpCount = maxJumpCount;
+            animator.speed = 1;
         }
     }
 
@@ -56,10 +60,17 @@ public class PlayerMovement : MonoBehaviour
 
     private void Move()
     {
-        float x = Input.GetAxisRaw("Horizontal"); 
-
+        float x = Input.GetAxisRaw("Horizontal");
+        if (x == 0)
+        {
+            animator.SetBool("isWalking", false);
+        }
+        else
+        {
+            animator.SetBool("isWalking", true);
+        }
         //Flip
-        if(x > 0)
+        if (x > 0)
         {
             transform.rotation = Quaternion.Euler(0, 0, 0);
         }
@@ -76,6 +87,7 @@ public class PlayerMovement : MonoBehaviour
         if (currentJumpCount > 0)
         {
             rb.linearVelocity = Vector2.up * jumpForce;
+            animator.speed = 0;
             currentJumpCount--;
         }
     }
