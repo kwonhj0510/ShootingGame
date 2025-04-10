@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class MainCameraController : MonoBehaviour
 {
-    [SerializeField] private PlayerMovement player;
+    [SerializeField] private PlayerController player;
     [SerializeField] Vector2 minCameraBoundary;
     [SerializeField] Vector2 maxCameraBoundary;
 
