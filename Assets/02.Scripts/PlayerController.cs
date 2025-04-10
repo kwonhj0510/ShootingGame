@@ -87,21 +87,24 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     private void Update()
     {
-        curShotDelay += Time.deltaTime;
-        curAttackDelay += Time.deltaTime;
+        if (photonView.IsMine)
+        {
+            curShotDelay += Time.deltaTime;
+            curAttackDelay += Time.deltaTime;
 
-        Move();
-        if (Input.GetKeyDown(jump))
-        {
-            Jump();
+            Move();
+            if (Input.GetKeyDown(jump))
+            {
+                Jump();
+            }
+            Fire();
+            if (curAmmoPerMag <= 0)
+            {
+                StartCoroutine(Reroad());
+            }
+            ThrowGrenade();
+            MeleeAttack();
         }
-        Fire();
-        if (curAmmoPerMag <= 0)
-        {
-            StartCoroutine(Reroad());
-        }
-        ThrowGrenade();
-        MeleeAttack();
     }
 
     private void FixedUpdate()
@@ -151,28 +154,42 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     {
         if (currentJumpCount > 0)
         {
-            rb.linearVelocity = Vector2.up * jumpForce;
-            animator.speed = 0;
             currentJumpCount--;
+
+            photonView.RPC("JumpRPC", RpcTarget.All);
         }
+    }
+
+    [PunRPC]
+    private void JumpRPC()
+    {
+        rb.linearVelocity = Vector2.up * jumpForce;
+        animator.speed = 0;
     }
     #endregion
 
     #region Gun_Fire
+
     private void Fire()
     {
         if (!Input.GetKey(fire)) return;
         if (curShotDelay < maxShotDelay) return;
         if (curAmmoPerMag <= 0) return;
 
-        GameObject bullet = ObjectPool.SpawnFromPool("Bullet", firePoint.position, transform.rotation);
-        Bullet bulletScript = bullet.GetComponent<Bullet>();
-        bulletScript.InitBullet(firePoint, gunDamage, effectiveRange);
+        // µø±‚»≠
+        photonView.RPC("FireRPC", RpcTarget.All, firePoint.position, transform.rotation);
 
         curShotDelay = 0;
         curAmmoPerMag--;
     }
 
+    [PunRPC]
+    void FireRPC(Vector3 pos, Quaternion rot)
+    {
+        GameObject bullet = ObjectPool.SpawnFromPool("Bullet", pos, rot);
+        Bullet bulletScript = bullet.GetComponent<Bullet>();
+        bulletScript.InitBullet(firePoint, gunDamage, effectiveRange);
+    }
     private IEnumerator Reroad()
     {
         yield return reloadWaitForSeconds;

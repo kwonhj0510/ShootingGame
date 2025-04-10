@@ -4,11 +4,13 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviourPunCallbacks
 {
+    public PhotonView potonView;
+    private Transform startPosition;
+
     private float speed = 16f;
     public float range;
     public float damage;
 
-    private Transform startPosition;
     private void Update()
     {
         transform.Translate(Vector2.right * speed * Time.deltaTime);
