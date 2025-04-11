@@ -245,7 +245,8 @@ GameObject:
   - component: {fileID: 7949827564656376726}
   - component: {fileID: 1640494947448005694}
   - component: {fileID: 8349886923107662603}
-  - component: {fileID: 709886663332631801}
+  - component: {fileID: 6949077574346201611}
+  - component: {fileID: 2118358090417445040}
   m_Layer: 3
   m_Name: Biker
   m_TagString: Player
@@ -402,19 +403,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09baad8d900c32643864e9ccbd1ab7c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weaponData: {fileID: 11400000, guid: 4e3c1ae989e659943a3b6816f64b60ad, type: 2}
-  characterData: {fileID: 11400000, guid: c2df3e5d6787c4c4092e935c819d9734, type: 2}
-  firePoint: {fileID: 1599522809037270920}
   pv: {fileID: 1640494947448005694}
   rb: {fileID: 332300937827709416}
   animator: {fileID: 7949827564656376726}
   sr: {fileID: 5327278170472379437}
-  hpSlider: {fileID: 399437390836215960}
+  characterData: {fileID: 11400000, guid: c2df3e5d6787c4c4092e935c819d9734, type: 2}
   nameText: {fileID: 716456574241974139}
+  hpSlider: {fileID: 399437390836215960}
+  maxHp: 0
+  curHp: 0
+  moveSpeed: 0
   groundLayerMask:
     serializedVersion: 2
     m_Bits: 64
-  speed: 15
+  gunData: {fileID: 11400000, guid: 4e3c1ae989e659943a3b6816f64b60ad, type: 2}
+  firePoint: {fileID: 1599522809037270920}
   gun: {fileID: 5449634094429441417}
   meleeBoxTransform: {fileID: 82082364068357721}
   meleeBoxSize: {x: 2, y: 1}
@@ -461,7 +464,8 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 3106847795297860001}
   - {fileID: 8349886923107662603}
-  - {fileID: 709886663332631801}
+  - {fileID: 6949077574346201611}
+  - {fileID: 2118358090417445040}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -486,7 +490,7 @@ MonoBehaviour:
   m_SynchronizeLayers:
   - SynchronizeType: 0
     LayerIndex: 0
---- !u!114 &709886663332631801
+--- !u!114 &6949077574346201611
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -502,6 +506,22 @@ MonoBehaviour:
   m_SynchronizeAngularVelocity: 0
   m_TeleportEnabled: 0
   m_TeleportIfDistanceGreaterThan: 3
+--- !u!114 &2118358090417445040
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3234287514034800956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 0
+  m_UseLocal: 1
 --- !u!1 &3506879814726973405
 GameObject:
   m_ObjectHideFlags: 0
@@ -514,6 +534,7 @@ GameObject:
   - component: {fileID: 6732744662843252982}
   - component: {fileID: 3638748471613505112}
   - component: {fileID: 2078007958989174790}
+  - component: {fileID: 1182626379299121959}
   m_Layer: 3
   m_Name: Canvas
   m_TagString: Untagged
@@ -605,6 +626,19 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &1182626379299121959
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3506879814726973405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3b1230627421b947ac67b707ac3bbaf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainCameraTransform: {fileID: 0}
 --- !u!1 &5449634094429441417
 GameObject:
   m_ObjectHideFlags: 0

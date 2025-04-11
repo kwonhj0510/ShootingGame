@@ -7,29 +7,32 @@ using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 {
-    public GunData weaponData;
-    public CharacterData characterData;
-    public Transform firePoint;
+    [Header("Components")]
     public PhotonView pv;
     public Rigidbody2D rb;
     private CapsuleCollider2D capsuleCollider;
     public Animator animator;
     public SpriteRenderer sr;
-    public Slider hpSlider;
+
+    [Header("Player Info")]
+    public CharacterData characterData;
     public TMP_Text nameText;
+    public Slider hpSlider;
+    public float maxHp;
+    public float curHp;
 
-
-    [Header("Movement")]
+    [Header("Movement Settings")]
+    public float moveSpeed;
     [SerializeField] private LayerMask groundLayerMask;
     private Vector3 footPosition;
-    public float speed;
     private float jumpForce = 10f;
     private int maxJumpCount = 2;
     private int currentJumpCount = 0;
-    private int hp;
     private bool isGrounded;
 
-    [Header("Gun")]
+    [Header("Gun Settings")]
+    public GunData gunData;
+    public Transform firePoint;
     [SerializeField] private GameObject gun;
     private float gunDamage;
     private float maxShotDelay;
@@ -40,17 +43,18 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     private int curAmmoPerMag;
     private WaitForSeconds reloadWaitForSeconds;
 
-    [Header("Knife and Grenade")]
-    private int curGrenade;
+    [Header("Melee (Knife) Settings")]
+    [SerializeField] private Transform meleeBoxTransform;
+    [SerializeField] private Vector2 meleeBoxSize;
     private float meleeDamage = 15f;
     private float maxAttackDelay = 0.4f;
     private float curAttackDelay;
-
-    [Header("MeleeAttack")]
-    [SerializeField] private Transform meleeBoxTransform;
-    [SerializeField] private Vector2 meleeBoxSize;
     private bool isAttack = false;
 
+    [Header("Grenade Settings")]
+    private int curGrenade;
+
+    [Header("Input Keys")]
     private KeyCode fire = KeyCode.J;
     private KeyCode meleeAttack = KeyCode.I;
     private KeyCode throwGrenade = KeyCode.U;
@@ -71,18 +75,18 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     private void Start()
     {
         //총 정보 초기화
-        maxShotDelay = weaponData.perShot;
-        maxAmmoPerMag = weaponData.magazine;
-        reloadTime = weaponData.reloadTime;
+        maxShotDelay = gunData.perShot;
+        maxAmmoPerMag = gunData.magazine;
+        reloadTime = gunData.reloadTime;
         reloadWaitForSeconds = new WaitForSeconds(reloadTime);
         curAmmoPerMag = maxAmmoPerMag;
-        gunDamage = weaponData.damage;
-        effectiveRange = weaponData.effectiveRange;
+        gunDamage = gunData.damage;
+        effectiveRange = gunData.effectiveRange;
         curGrenade = 10;
 
         //캐릭터 정보 초기화
-        speed = characterData.speed;
-        hp = characterData.maxHP;
+        moveSpeed = characterData.speed;
+        curHp = maxHp = characterData.maxHP;
     }
 
     private void Update()
@@ -104,7 +108,10 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             }
             ThrowGrenade();
             MeleeAttack();
+
+           
         }
+        hpSlider.value = curHp / maxHp;
     }
 
     private void FixedUpdate()
@@ -122,7 +129,14 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     }
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        
+        if (stream.IsWriting)
+        {
+            stream.SendNext(hpSlider.value);
+        }
+        else
+        {
+            hpSlider.value = (float)stream.ReceiveNext();
+        }
     }
 
     #region Player_Movement
@@ -147,7 +161,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             transform.rotation = Quaternion.Euler(0, -180, 0);
         }
 
-        rb.linearVelocity = new Vector2(x * speed / 10, rb.linearVelocityY);
+        rb.linearVelocity = new Vector2(x * moveSpeed / 10, rb.linearVelocityY);
     }
 
     private void Jump()
@@ -177,19 +191,14 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         if (curAmmoPerMag <= 0) return;
 
         // 동기화
-        photonView.RPC("FireRPC", RpcTarget.All, firePoint.position, transform.rotation);
+        GameObject bullet = PhotonNetwork.Instantiate("Bullet", firePoint.position, transform.rotation);
+        Bullet bulletScript = bullet.GetComponent<Bullet>();
+        bulletScript.photonView.RPC("InitBulletRPC", RpcTarget.AllBuffered,gunDamage, effectiveRange);
 
         curShotDelay = 0;
         curAmmoPerMag--;
     }
 
-    [PunRPC]
-    void FireRPC(Vector3 pos, Quaternion rot)
-    {
-        GameObject bullet = ObjectPool.SpawnFromPool("Bullet", pos, rot);
-        Bullet bulletScript = bullet.GetComponent<Bullet>();
-        bulletScript.InitBullet(firePoint, gunDamage, effectiveRange);
-    }
     private IEnumerator Reroad()
     {
         yield return reloadWaitForSeconds;
@@ -202,7 +211,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     {
         if (!Input.GetKeyDown(throwGrenade)) return;
         if (curGrenade <= 0) return;
-        GameObject grenade = ObjectPool.SpawnFromPool("Grenade", transform.position);
+        GameObject grenade = PhotonNetwork.Instantiate("Grenade", transform.position, Quaternion.identity);
         if (grenade != null)
         {
             Rigidbody2D rb = grenade.GetComponent<Rigidbody2D>();
@@ -249,4 +258,19 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         Gizmos.DrawWireCube(meleeBoxTransform.transform.position, meleeBoxSize);
     }
     #endregion
+
+   
+    public void TakeDamage(float damage)
+    {
+        curHp -= damage;
+        Debug.Log("아야!");
+        if (curHp <= 0)
+        {
+            GameObject.Find("Canvas").transform.Find("RespawnPanel").gameObject.SetActive(true);
+            photonView.RPC("DestroyRPC", RpcTarget.AllBuffered);
+        }
+    }
+
+    [PunRPC]
+    private void DestroyRPC() => Destroy(gameObject);
 }
